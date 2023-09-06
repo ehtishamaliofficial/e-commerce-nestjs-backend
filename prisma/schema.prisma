@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  username String   @unique
+  email    String   @unique
+  password String
+  cart     Cart[]   @relation("UserCart")
+  orders   Order[]  @relation("UserOrders")
+  reviews  Review[] @relation("UserReviews")
+  profile  Profile?
+}
+
+model Profile {
+  id          String  @id @default(uuid()) // Use UUID as the primary key
+  firstName   String?
+  lastName    String?
+  phoneNumber String?
+  address     String?
+  city        String?
+  postalCode  String?
+  country     String?
+  user        User    @relation(fields: [userId], references: [id])
+  userId      String  @unique
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String?
+  description String?
+  price       Decimal?
+  stockQty    Int?
+  categories  Category[]  @relation("ProductCategories")
+  reviews     Review[]    @relation("ProductReviews")
+  CartItem    CartItem[]
+  OrderItem   OrderItem[]
+}
+
+model Category {
+  id             String     @id @default(uuid())
+  name           String
+  parentCategory Category?  @relation("Subcategories", fields: [parentId], references: [id])
+  parentId       String?
+  subcategories  Category[] @relation("Subcategories")
+  products       Product[]  @relation("ProductCategories")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  user      User       @relation("UserCart", fields: [userId], references: [id])
+  userId    String
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  cartId    String
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  location      String
+  createdAt     DateTime
+  paymentMethod String
+  user          User        @relation("UserOrders", fields: [userId], references: [id])
+  userId        String
+  orderItems    OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+}
+
+model Review {
+  id        String  @id @default(uuid())
+  rating    Int
+  comment   String?
+  user      User    @relation("UserReviews", fields: [userId], references: [id])
+  userId    String
+  product   Product @relation("ProductReviews", fields: [productId], references: [id])
+  productId String
+}
