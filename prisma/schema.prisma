@@ -12,6 +12,7 @@ model User {
   username String   @unique
   email    String   @unique
   password String
+  role     String   @default("USER")
   cart     Cart[]   @relation("UserCart")
   orders   Order[]  @relation("UserOrders")
   reviews  Review[] @relation("UserReviews")
@@ -19,7 +20,7 @@ model User {
 }
 
 model Profile {
-  id          String  @id @default(uuid()) // Use UUID as the primary key
+  id          String  @id @default(uuid())
   firstName   String?
   lastName    String?
   phoneNumber String?
